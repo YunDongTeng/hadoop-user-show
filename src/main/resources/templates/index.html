@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+    <script th:src="@{/js/echarts.common.min.js}"></script>
+    <script>
+        $(function () {
+            $.ajax({
+                url:'/user/employ/top',
+                type:'POST',
+                dataType:'json',
+                success:function (data) {
+                   initEmploy(data);
+                }
+            });
+
+            $.ajax({
+                url:'/user/employ/pie/top',
+                type:'POST',
+                dataType:'json',
+                success:function (data) {
+                    console.log(data);
+                    initEmployPie(data);
+                }
+            })
+        })
+
+        function initEmploy(data) {
+            var employChart = echarts.init(document.getElementById('employ'));
+            // 指定图表的配置项和数据
+            var option = {
+                color: ['#3398DB'],
+
+                title: {
+                    text: '知乎用户职业分析Top 10',
+                    x:'center'
+                },
+                tooltip: {},
+                legend: {
+                    data:['职业']
+                },
+                xAxis: {
+                    data: data.xData
+                },
+                yAxis: {},
+                series: [{
+                    name: '人数',
+                    type: 'bar',
+                    data: data.yData
+                }]
+            }
+            employChart.setOption(option)
+        }
+
+        function initEmployPie(data) {
+
+            var tipArray = new Array();
+            for(var i=0;i<data.length;i++){
+                tipArray[i] = data[i].name;
+            }
+            console.log(tipArray);
+            var employPieChart = echarts.init(document.getElementById('employPie'));
+           var option = {
+               tooltip: {
+                   trigger: 'item',
+                   formatter: "{b}: {c} ({d}%)"
+               },
+               title : {
+                   text: 'Top10 行业所占比例',
+                   x:'center'
+               },
+                legend: {
+                    orient: 'vertical',
+                    x: 'left',
+                    data:tipArray
+                },
+                series: [
+                    {
+                        name:'',
+                        type:'pie',
+                        radius: ['50%', '70%'],
+                        avoidLabelOverlap: false,
+                        label: {
+                            normal: {
+                                show: false,
+                                position: 'center'
+                            },
+                            emphasis: {
+                                show: true,
+                                textStyle: {
+                                    fontSize: '30',
+                                    fontWeight: 'bold'
+                                }
+                            }
+                        },
+                        labelLine: {
+                            normal: {
+                                show: false
+                            }
+                        },
+                        data:data
+                    }
+                ]
+            };
+            employPieChart.setOption(option)
+
+        }
+
+    </script>
+</head>
+
+<body>
+<h1>知乎用户统计</h1>
+
+<div id="employ"></div>
+<div id="employPie"></div>
+</body>
+<style>
+    h1 {
+        text-align: center;
+    }
+    #employ {
+        width:1000px;
+        height:400px;
+        float:left
+    }
+    #employPie {
+        width:500px;
+        height:400px;
+        float:right
+    }
+</style>
+</html>
